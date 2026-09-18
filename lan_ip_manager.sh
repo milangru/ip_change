@@ -73,6 +73,7 @@ while true; do
 
     # Polja za IP/gateway/DNS UVEK prikazuju default vrednosti (za unos fiksne IP).
     # Stvarno trenutno stanje uređaja prikazano je kao dva istaknuta reda na samom dnu forme.
+    # Custom dugmad: "Osveži IP" (kod 2) samo ponovo učitava stvarno stanje, bez primene izmena.
     FORM_DATA=$(yad --form --title="Upravljanje LAN IP adresom" \
         --window-icon="network-wired" \
         --width=440 \
@@ -83,10 +84,21 @@ while true; do
         --field="DNS serveri (odvojeni zarezom):" "$DEFAULT_DNS" \
         --field="  :LBL" "" \
         --field="<span size='large'>🔌  <b>Trenutna IP:</b>  <span foreground='#2e86de'><b>${ACT_IP:-nepoznato}</b></span></span>:LBL" "" \
-        --field="<span size='large'>🌐  <b>Gateway:</b>  <span foreground='#2e86de'><b>${ACT_GW:-nepoznato}</b></span></span>:LBL" "")
+        --field="<span size='large'>🌐  <b>Gateway:</b>  <span foreground='#2e86de'><b>${ACT_GW:-nepoznato}</b></span></span>:LBL" "" \
+        --button="🔄 Osveži IP:2" \
+        --button="gtk-cancel:1" \
+        --button="gtk-ok:0")
 
-    # Ako korisnik klikne Cancel ili zatvori prozor - izlazimo iz petlje i skripta se završava
-    if [ $? -ne 0 ]; then
+    RET=$?
+
+    # "Osveži IP" - samo ponovo pokreni petlju (na vrhu će se ponovo pozvati read_actual_settings),
+    # bez primene ikakvih izmena na mrežnoj konekciji
+    if [ "$RET" -eq 2 ]; then
+        continue
+    fi
+
+    # Bilo šta osim "Primeni" (0) i "Osveži IP" (2) - Cancel ili zatvoren prozor - izlazimo iz petlje
+    if [ "$RET" -ne 0 ]; then
         break
     fi
 
