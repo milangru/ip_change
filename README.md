@@ -1,70 +1,85 @@
-# LAN IP Manager
+# LAN IP Manager (Linux, bash + yad)
 
-Grafička alatka (bash + [yad](https://github.com/v1cont/yad)) za brzo prebacivanje Ethernet (LAN) konekcije na Linux sistemima između **automatske DHCP** adrese i **fiksne IP** adrese, bez otvaranja terminala ili mrežnih podešavanja.
+Grafička alatka za **Linux** koja jednim klikom prebacuje žičnu (Ethernet) konekciju između **automatske DHCP** adrese i **fiksne IP** adrese. Napisana je u bash-u, koristi `yad` za prozor i `NetworkManager` (`nmcli`) za primenu podešavanja.
 
-![Screenshot](screenshot.png)
-
-## Zašto ova alatka
-
-Kada često menjate mrežu (npr. povremeno pristupate uređaju na fiksnoj lokalnoj IP adresi, a inače koristite DHCP), ručno kucanje `nmcli` komandi je sporo i podložno greškama. Ova skripta otvara jednostavan grafički prozor, primenjuje podešavanja preko `NetworkManager`-a i **fizički restartuje mrežni port** da bi se izmene odmah primenile.
+> Ovo je verzija samo za Linux. Za Windows, macOS i Linux u jednom fajlu pogledajte Python verziju: [Menjanj-ip-allOS](https://github.com/milangru/Menjanj-ip-allOS).
 
 ## Funkcionalnosti
 
-- Grafički interfejs (YAD forma) — bez terminala i kucanja komandi
-- Prebacivanje između **DHCP** i **fiksne IP** jednim klikom
-- Podrazumevane (default) vrednosti unapred popunjene u poljima za fiksnu IP
-- Prikaz **stvarne trenutne IP adrese i gateway-a** uređaja, uživo očitano sa mrežnog interfejsa
-- Potpuni restart LAN porta posle svake izmene (`ip link down/up` + `nmcli device connect`), ne samo `connection up`
-- Prozor ostaje otvoren posle primene izmena — možete odmah nastaviti sa daljim podešavanjem, dok ne kliknete Cancel ili zatvorite prozor
-- Automatsko prepoznavanje aktivne Ethernet konekcije preko `nmcli`
+- Prebacivanje između **DHCP** i **fiksne IP** adrese
+- Polja za fiksnu IP uvek kreću od podrazumevanih vrednosti; ako polje ostane prazno, koristi se default
+- Prikaz **stvarne trenutne IP adrese i gateway-a** uređaja na dnu forme
+- Dugme **"🔄 Osveži IP"** koje ponovo očitava stvarno stanje, bez primene izmena
+- Potpuni restart LAN porta posle svake izmene (`nmcli device disconnect`, `ip link down/up`, `nmcli device connect`)
+- Prozor ostaje otvoren posle primene, pa možete odmah praviti nove izmene
+- Automatski pronalazi aktivnu Ethernet konekciju
 
 ## Zahtevi
 
-- Linux distribucija sa `NetworkManager`-om (`nmcli`)
-- Instaliran `yad`:
-  ```bash
-  sudo apt install yad
-  ```
-- Root/sudo privilegije za izmenu mrežnih podešavanja i restart interfejsa
+- Linux sa `NetworkManager`-om (`nmcli`)
+- `yad`: `sudo apt install yad`
+- Root privilegije (sudo ili pkexec)
 
 ## Instalacija
 
 ```bash
-git clone https://github.com/<vas-username>/<naziv-repozitorijuma>.git
-cd <naziv-repozitorijuma>
+git clone https://github.com/milangru/ip_change.git
+cd ip_change
 sudo cp lan_ip_manager.sh /usr/local/bin/lan-ip
 sudo chmod +x /usr/local/bin/lan-ip
 ```
 
 ## Upotreba
 
-Pokrenite iz terminala:
-
 ```bash
 sudo lan-ip
 ```
 
-Ili napravite `.desktop` prečicu za pokretanje jednim klikom sa Desktop-a ili iz menija aplikacija.
+## Pokretanje duplim klikom (prečica)
 
-Otvara se forma sa:
-- izborom režima rada (Fiksna IP / Automatski DHCP)
-- poljima za unos IP adrese, gateway-a i DNS servera (samo za fiksni režim)
-- prikazom stvarne trenutne IP adrese i gateway-a uređaja
+`pkexec` sam po sebi ne prosleđuje grafički ekran root procesu, pa prozor može da se ne otvori. Zato napravite pomoćnu skriptu:
+
+```bash
+sudo tee /usr/local/bin/lan-ip-launcher > /dev/null << 'EOT'
+#!/bin/bash
+pkexec env \
+  DISPLAY="$DISPLAY" \
+  XAUTHORITY="${XAUTHORITY:-$HOME/.Xauthority}" \
+  WAYLAND_DISPLAY="$WAYLAND_DISPLAY" \
+  XDG_RUNTIME_DIR="$XDG_RUNTIME_DIR" \
+  /usr/local/bin/lan-ip
+EOT
+sudo chmod +x /usr/local/bin/lan-ip-launcher
+```
+
+Zatim napravite `~/.local/share/applications/lan-ip.desktop`:
+
+```ini
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Ip Changer
+Exec=/usr/local/bin/lan-ip-launcher
+Icon=network-workgroup
+Terminal=false
+```
+
+Ako se prozor i dalje ne pojavi, jednom pokrenite `xhost +SI:localuser:root`.
 
 ## Podešavanje podrazumevanih vrednosti
 
-Podrazumevana fiksna IP adresa, gateway i DNS serveri se menjaju na vrhu skripte:
+Na vrhu skripte:
 
 ```bash
-DEFAULT_IP="192.168.100.101/24"
-DEFAULT_GATEWAY="192.168.100.100"
-DEFAULT_DNS="8.8.8.8, 1.1.1.1"
+DEFAULT_IP="192.168.1.10/24"   # /24 = maska 255.255.255.0
+DEFAULT_GATEWAY=""             # prazno - bez gateway-a
+DEFAULT_DNS=""                 # prazno - bez DNS servera
 ```
 
 ## Napomena
 
-Skripta menja aktivnu NetworkManager konekciju tipa `802-3-ethernet` (žičnu/Ethernet). Wi-Fi konekcije nisu podržane.
+Skripta menja aktivnu NetworkManager konekciju tipa `802-3-ethernet`. Wi-Fi nije podržan.
 
 ## Licenca
 
-Slobodno za korišćenje i izmenu. Dodajte licencu po želji (npr. MIT) ako planirate javno deljenje repozitorijuma.
+Slobodno za korišćenje i izmenu. Dodajte licencu po želji (npr. MIT).
