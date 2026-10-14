@@ -24,9 +24,9 @@ DEVICE=$(nmcli -t -f GENERAL.DEVICES connection show "$CONN_NAME" | cut -d: -f2)
 
 # Fiksne (nepromenljive) podrazumevane vrednosti za režim "Fiksna IP" - polja formulara UVEK
 # kreću od ovih vrednosti kad je izabrana fiksna IP, bez obzira šta je uređaj prethodno imao preko DHCP-a
-DEFAULT_IP="192.168.100.101/24"
-DEFAULT_GATEWAY="192.168.100.100"
-DEFAULT_DNS="8.8.8.8, 1.1.1.1"
+DEFAULT_IP="192.168.1.10/24"
+DEFAULT_GATEWAY="255.255.255.0"
+DEFAULT_DNS=""
 
 # Funkcija koja čita STVARNU trenutnu IP/gateway/DNS sa uređaja - za prikaz na dnu forme
 # (informativno), nikad da popuni polja za unos fiksne IP
