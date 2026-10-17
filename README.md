@@ -6,7 +6,7 @@ Grafička alatka za **Linux** koja jednim klikom prebacuje žičnu (Ethernet) ko
 
 ## Funkcionalnosti
 
-- Prebacivanje između **DHCP** i **fiksne IP** adrese
+- Prebacivanje između **DHCP** i **fiksne IP** adrese preko padajućeg menija
 - Polja za fiksnu IP uvek kreću od podrazumevanih vrednosti; ako polje ostane prazno, koristi se default
 - Prikaz **stvarne trenutne IP adrese i gateway-a** uređaja na dnu forme
 - Dugme **"🔄 Osveži IP"** koje ponovo očitava stvarno stanje, bez primene izmena

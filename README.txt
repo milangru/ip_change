@@ -13,7 +13,7 @@ https://github.com/milangru/Menjanj-ip-allOS
 
 FUNKCIONALNOSTI
 ---------------
-- Prebacivanje izmedju DHCP i fiksne IP adrese
+- Prebacivanje izmedju DHCP i fiksne IP adrese preko padajuceg menija
 - Polja za fiksnu IP uvek krecu od podrazumevanih vrednosti; ako polje
   ostane prazno, koristi se default
 - Prikaz stvarne trenutne IP adrese i gateway-a uredjaja na dnu forme
