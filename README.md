@@ -1,74 +1,68 @@
 # LAN IP Manager (Linux, bash + yad)
 
-Grafička alatka za **Linux** koja jednim klikom prebacuje žičnu (Ethernet) konekciju između **automatske DHCP** adrese i **fiksne IP** adrese. Napisana je u bash-u, koristi `yad` za prozor i `NetworkManager` (`nmcli`) za primenu podešavanja.
+Grafička alatka za **Linux** koja prebacuje žičnu (Ethernet) konekciju između **automatske DHCP** adrese i **fiksne IP** adrese. Napisana je u bash-u, koristi `yad` za prozor i `NetworkManager` (`nmcli`) za primenu podešavanja.
 
 > Ovo je verzija samo za Linux. Za Windows, macOS i Linux u jednom fajlu pogledajte Python verziju: [Menjanj-ip-allOS](https://github.com/milangru/Menjanj-ip-allOS).
 
 ## Funkcionalnosti
 
 - Prebacivanje između **DHCP** i **fiksne IP** adrese preko padajućeg menija
-- Polja za fiksnu IP uvek kreću od podrazumevanih vrednosti; ako polje ostane prazno, koristi se default
+- Padajući meni se otvara na režimu suprotnom od trenutnog, a trenutni režim piše iznad njega
 - Prikaz **stvarne trenutne IP adrese i gateway-a** uređaja na dnu forme
 - Dugme **"🔄 Osveži IP"** koje ponovo očitava stvarno stanje, bez primene izmena
-- Potpuni restart LAN porta posle svake izmene (`nmcli device disconnect`, `ip link down/up`, `nmcli device connect`)
+- Restart LAN porta posle svake izmene, uz čekanje da port dobije signal
+- Provera da li je adresa stvarno primenjena i poruka o grešci ako nije
 - Prozor ostaje otvoren posle primene, pa možete odmah praviti nove izmene
-- Automatski pronalazi aktivnu Ethernet konekciju
+- Stavka **IP Changer** u meniju aplikacija (Settings / Preferences), sa ikonicom
 
 ## Zahtevi
 
-- Linux sa `NetworkManager`-om (`nmcli`)
-- `yad`: `sudo apt install yad`
-- Root privilegije (sudo ili pkexec)
+- Linux sa `NetworkManager`-om (`nmcli`) i `polkit`-om (`pkexec`)
+- `yad` (instalacija ga nudi da instalira preko `apt`, ili ručno: `sudo apt install yad`)
 
 ## Instalacija
 
 ```bash
 git clone https://github.com/milangru/ip_change.git
 cd ip_change
-sudo cp lan_ip_manager.sh /usr/local/bin/lan-ip
-sudo chmod +x /usr/local/bin/lan-ip
+bash install.sh
 ```
 
+Pokrenite ga kao običan korisnik (bez `sudo`); sudo lozinku traži sam, samo za upis u `/usr/local/bin`. Instalacija:
+
+- kopira skriptu kao `lan-ip` i pravi pokretač `lan-ip-launcher` u `/usr/local/bin`
+- kopira ikonicu iz foldera `icon/` (ako je nema, koristi sistemsku ikonicu mrežnog porta)
+- dodaje stavku **IP Changer** u meni aplikacija
+
+Ako se stavka ne pojavi odmah, odjavite se i prijavite. Na Linux Mint-u se nalazi u grupi **Preferences**.
+
 ## Upotreba
+
+Pokrenite **IP Changer** iz menija aplikacija (traži lozinku), ili iz terminala:
 
 ```bash
 sudo lan-ip
 ```
 
-## Pokretanje duplim klikom (prečica)
-
-`pkexec` sam po sebi ne prosleđuje grafički ekran root procesu, pa prozor može da se ne otvori. Zato napravite pomoćnu skriptu:
+## Uklanjanje
 
 ```bash
-sudo tee /usr/local/bin/lan-ip-launcher > /dev/null << 'EOT'
-#!/bin/bash
-pkexec env \
-  DISPLAY="$DISPLAY" \
-  XAUTHORITY="${XAUTHORITY:-$HOME/.Xauthority}" \
-  WAYLAND_DISPLAY="$WAYLAND_DISPLAY" \
-  XDG_RUNTIME_DIR="$XDG_RUNTIME_DIR" \
-  /usr/local/bin/lan-ip
-EOT
-sudo chmod +x /usr/local/bin/lan-ip-launcher
+bash uninstall.sh
 ```
 
-Zatim napravite `~/.local/share/applications/lan-ip.desktop`:
+## Struktura repozitorijuma
 
-```ini
-[Desktop Entry]
-Version=1.0
-Type=Application
-Name=Ip Changer
-Exec=/usr/local/bin/lan-ip-launcher
-Icon=network-workgroup
-Terminal=false
 ```
-
-Ako se prozor i dalje ne pojavi, jednom pokrenite `xhost +SI:localuser:root`.
+ip_change/
+├── lan_ip_manager.sh   # glavna skripta
+├── install.sh          # instalacija (skripta, pokretač, ikonica, meni)
+├── uninstall.sh        # uklanjanje
+└── icon/lan-ip.png     # ikonica za meni
+```
 
 ## Podešavanje podrazumevanih vrednosti
 
-Na vrhu skripte:
+Na vrhu `lan_ip_manager.sh`:
 
 ```bash
 DEFAULT_IP="192.168.1.10/24"   # /24 = maska 255.255.255.0
@@ -76,9 +70,20 @@ DEFAULT_GATEWAY=""             # prazno - bez gateway-a
 DEFAULT_DNS=""                 # prazno - bez DNS servera
 ```
 
+Posle izmene ponovo pokrenite `bash install.sh`.
+
+## Rešavanje problema
+
+- **Pita za lozinku, ali se prozor ne otvori:** root proces nema pristup ekranu. Jednom pokrenite `xhost +SI:localuser:root` i probajte ponovo.
+- **Poruka da port nema signal:** proverite mrežni kabl i uređaj s druge strane. Podešavanja su već sačuvana i primeniće se čim se pojavi signal.
+
 ## Napomena
 
 Skripta menja aktivnu NetworkManager konekciju tipa `802-3-ethernet`. Wi-Fi nije podržan.
+
+## Ikonica
+
+<a href="https://www.flaticon.com/free-icons/ethernet" title="ethernet icons">Ethernet icons created by Those Icons - Flaticon</a>
 
 ## Licenca
 
