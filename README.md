@@ -44,6 +44,22 @@ Pokrenite **IP Changer** iz menija aplikacija (traži lozinku), ili iz terminala
 sudo lan-ip
 ```
 
+## Pokretanje bez lozinke (opciono)
+
+Podrazumevano aplikacija traži lozinku, jer menja mrežu kao root. Ako to ne želite:
+
+```bash
+bash install.sh --no-password
+```
+
+Aplikacija se tada pokreće bez lozinke za **članove grupe `netdev`**, i samo ova aplikacija (svi ostali programi i dalje traže lozinku). Instalacija pravi grupu `netdev` ako je nema i dodaje vas u nju, pa se posle instalacije jednom odjavite i prijavite.
+
+Druge korisnike dodajete u grupu kasnije, npr. preko **Users and Groups** (grupa `netdev`, pa čekirate korisnike) ili komandom `sudo usermod -aG netdev ime_korisnika`. Svaki dodati korisnik mora da se odjavi i prijavi. Korisnici koji nisu u grupi i dalje unose lozinku.
+
+Zahteva polkit 0.106 ili noviji (npr. Linux Mint 22, Ubuntu 24.04). Imajte na umu da svaki program koji radi pod nalogom člana grupe tada može da menja mrežna podešavanja bez lozinke, pa koristite ovu opciju samo na računaru kojem verujete.
+
+Za povratak na unos lozinke pokrenite `bash uninstall.sh`, pa ponovo `bash install.sh`. Grupa `netdev` i članstva ostaju kakva jesu.
+
 ## Uklanjanje
 
 ```bash

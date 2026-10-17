@@ -62,6 +62,32 @@ terminala:
     sudo lan-ip
 
 
+POKRETANJE BEZ LOZINKE (OPCIONO)
+--------------------------------
+Podrazumevano aplikacija trazi lozinku, jer menja mrezu kao root. Ako
+to ne zelite:
+
+    bash install.sh --no-password
+
+Aplikacija se tada pokrece bez lozinke za clanove grupe netdev, i samo
+ova aplikacija (svi ostali programi i dalje traze lozinku).
+Instalacija pravi grupu netdev ako je nema i dodaje vas u nju, pa se
+posle instalacije jednom odjavite i prijavite.
+
+Druge korisnike dodajete u grupu kasnije, npr. preko "Users and
+Groups" (grupa netdev, pa cekirate korisnike) ili komandom
+"sudo usermod -aG netdev ime_korisnika". Svaki dodati korisnik mora da
+se odjavi i prijavi. Korisnici koji nisu u grupi i dalje unose lozinku.
+
+Zahteva polkit 0.106 ili noviji (npr. Linux Mint 22, Ubuntu 24.04).
+Imajte na umu da svaki program koji radi pod nalogom clana grupe tada
+moze da menja mrezna podesavanja bez lozinke, pa koristite ovu opciju
+samo na racunaru kojem verujete.
+
+Za povratak na unos lozinke pokrenite "bash uninstall.sh", pa ponovo
+"bash install.sh". Grupa netdev i clanstva ostaju kakva jesu.
+
+
 UKLANJANJE
 ----------
     bash uninstall.sh
