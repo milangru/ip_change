@@ -13,7 +13,7 @@ Grafička alatka za **Linux** koja prebacuje žičnu (Ethernet) konekciju izmeđ
 - Restart LAN porta posle svake izmene, uz čekanje da port dobije signal
 - Provera da li je adresa stvarno primenjena i poruka o grešci ako nije
 - Prozor ostaje otvoren posle primene, pa možete odmah praviti nove izmene
-- Stavka **IP Changer** u meniju aplikacija (Settings / Preferences), sa ikonicom
+- Stavka **IP Changer** u meniju aplikacija (System / Administration), sa ikonicom
 
 ## Zahtevi
 
@@ -34,7 +34,7 @@ Pokrenite ga kao običan korisnik (bez `sudo`); sudo lozinku traži sam, samo za
 - kopira ikonicu iz foldera `icon/` (ako je nema, koristi sistemsku ikonicu mrežnog porta)
 - dodaje stavku **IP Changer** u meni aplikacija
 
-Ako se stavka ne pojavi odmah, odjavite se i prijavite. Na Linux Mint-u se nalazi u grupi **Preferences**.
+Ako se stavka ne pojavi odmah, odjavite se i prijavite. Na Linux Mint-u se nalazi u grupi **Administration** (kategorija System).
 
 ## Upotreba
 

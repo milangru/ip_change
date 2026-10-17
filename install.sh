@@ -67,7 +67,7 @@ else
     ICON="network-wired"
 fi
 
-# Stavka u meniju aplikacija (Settings / Postavke)
+# Stavka u meniju aplikacija (grupa System; na Linux Mint-u se zove Administration)
 cat > "$APP_DIR/lan-ip.desktop" << DESKTOP_EOF
 [Desktop Entry]
 Version=1.0
@@ -77,12 +77,12 @@ Comment=Prebacivanje LAN konekcije između DHCP-a i fiksne IP adrese
 Exec=$BIN_DIR/lan-ip-launcher
 Icon=$ICON
 Terminal=false
-Categories=Settings;HardwareSettings;
+Categories=System;
 DESKTOP_EOF
 chmod 644 "$APP_DIR/lan-ip.desktop"
 
 update-desktop-database "$APP_DIR" 2> /dev/null || true
 
 echo
-echo "Gotovo. Potražite \"IP Changer\" u meniju aplikacija (Settings / Preferences)."
+echo "Gotovo. Potražite \"IP Changer\" u meniju aplikacija (System / Administration)."
 echo "Ako se ne pojavi odmah, odjavite se i prijavite."

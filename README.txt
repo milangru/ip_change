@@ -24,7 +24,7 @@ FUNKCIONALNOSTI
 - Provera da li je adresa stvarno primenjena i poruka o gresci ako nije
 - Prozor ostaje otvoren posle primene, pa mozete odmah praviti nove
   izmene
-- Stavka "IP Changer" u meniju aplikacija (Settings / Preferences), sa
+- Stavka "IP Changer" u meniju aplikacija (System / Administration), sa
   ikonicom
 
 
@@ -51,7 +51,7 @@ samo za upis u /usr/local/bin. Instalacija:
 - dodaje stavku "IP Changer" u meni aplikacija
 
 Ako se stavka ne pojavi odmah, odjavite se i prijavite. Na Linux
-Mint-u se nalazi u grupi Preferences.
+Mint-u se nalazi u grupi Administration (kategorija System).
 
 
 UPOTREBA
