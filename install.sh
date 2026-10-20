@@ -18,8 +18,8 @@ POLKIT_RULES_DIR="${POLKIT_RULES_DIR:-/etc/polkit-1/rules.d}"
 NO_PASSWORD=0
 GROUP_ADDED=0
 [ "$1" = "--no-password" ] && NO_PASSWORD=1
-ICON_DIR="$HOME/.local/share/icons"
-APP_DIR="$HOME/.local/share/applications"
+ICON_DIR="${ICON_DIR:-/usr/local/share/icons}"
+APP_DIR="${APP_DIR:-/usr/local/share/applications}"
 
 if [ "$(id -u)" -eq 0 ]; then
     echo "Ne pokrećite install.sh sa sudo - pokrenite ga kao običan korisnik (./install.sh)."
@@ -117,17 +117,22 @@ RULE_EOF
     rm -f "$POLICY_TMP" "$RULE_TMP"
 fi
 
-# Ikonica (iz repozitorijuma; ako je nema, koristi se sistemska ikonica mrežnog porta)
-mkdir -p "$ICON_DIR" "$APP_DIR"
+# Sistemska ikonica i stavka menija dostupne svim korisnicima.
+# Za ove lokacije sudo se koristi nezavisno od dozvola za BIN_DIR.
+SUDO_APP=""
+{ [ -w "$APP_DIR" ] && [ -w "$ICON_DIR" ]; } || SUDO_APP="sudo"
+$SUDO_APP mkdir -p "$ICON_DIR" "$APP_DIR"
+
 if [ -f icon/lan-ip.png ]; then
-    cp icon/lan-ip.png "$ICON_DIR/lan-ip.png"
+    $SUDO_APP install -m 644 icon/lan-ip.png "$ICON_DIR/lan-ip.png"
     ICON="$ICON_DIR/lan-ip.png"
 else
     ICON="network-wired"
 fi
 
-# Stavka u meniju aplikacija (grupa System; na Linux Mint-u se zove Administration)
-cat > "$APP_DIR/lan-ip.desktop" << DESKTOP_EOF
+# Stavka u meniju aplikacija (System / Administration na Linux Mint-u)
+DESKTOP_TMP=$(mktemp)
+cat > "$DESKTOP_TMP" << DESKTOP_EOF
 [Desktop Entry]
 Version=1.0
 Type=Application
@@ -138,12 +143,14 @@ Icon=$ICON
 Terminal=false
 Categories=System;
 DESKTOP_EOF
-chmod 644 "$APP_DIR/lan-ip.desktop"
+$SUDO_APP install -m 644 "$DESKTOP_TMP" "$APP_DIR/lan-ip.desktop"
+rm -f "$DESKTOP_TMP"
 
-update-desktop-database "$APP_DIR" 2> /dev/null || true
+$SUDO_APP update-desktop-database "$APP_DIR" 2> /dev/null || true
 
 echo
 echo "Gotovo. Potražite \"IP Changer\" u meniju aplikacija (System / Administration)."
+echo "Pokretač je instaliran sistemski i dostupan je svim korisnicima."
 echo "Ako se ne pojavi odmah, odjavite se i prijavite."
 if [ "$GROUP_ADDED" -eq 1 ]; then
     echo

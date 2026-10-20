@@ -15,6 +15,14 @@ if [ -e "$POLKIT_ACTIONS_DIR/com.milangru.lan-ip.policy" ] || [ -e "$POLKIT_RULE
     { [ -w "$POLKIT_ACTIONS_DIR" ] && [ -w "$POLKIT_RULES_DIR" ]; } || SUDO_P="sudo"
     $SUDO_P rm -f "$POLKIT_ACTIONS_DIR/com.milangru.lan-ip.policy" "$POLKIT_RULES_DIR/49-lan-ip.rules"
 fi
+# Ukloni sistemski pokretač i ikonicu, kao i eventualne stare korisničke fajlove.
+APP_DIR="${APP_DIR:-/usr/local/share/applications}"
+ICON_DIR="${ICON_DIR:-/usr/local/share/icons}"
+SUDO_APP=""
+{ [ -w "$APP_DIR" ] && [ -w "$ICON_DIR" ]; } || SUDO_APP="sudo"
+$SUDO_APP rm -f "$APP_DIR/lan-ip.desktop" "$ICON_DIR/lan-ip.png"
+$SUDO_APP update-desktop-database "$APP_DIR" 2> /dev/null || true
+
 rm -f "$HOME/.local/share/applications/lan-ip.desktop" "$HOME/.local/share/icons/lan-ip.png"
 update-desktop-database "$HOME/.local/share/applications" 2> /dev/null || true
 
