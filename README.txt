@@ -24,13 +24,16 @@ FUNKCIONALNOSTI
 - Provera da li je adresa stvarno primenjena i poruka o gresci ako nije
 - Prozor ostaje otvoren posle primene, pa mozete odmah praviti nove
   izmene
-- Stavka "IP Changer" u meniju aplikacija (System / Administration), sa
-  ikonicom
+- Instalacija za sve korisnicke naloge na racunaru: stavka u meniju
+  aplikacija i precica na radnoj povrsini
+- Pokretanje bez lozinke za clanove grupe netdev; ostali korisnici
+  unose lozinku
 
 
 ZAHTEVI
 -------
-- Linux sa NetworkManager-om (nmcli) i polkit-om (pkexec)
+- Linux sa NetworkManager-om (nmcli) i polkit-om (pkexec), polkit
+  0.106 ili noviji (npr. Linux Mint 22, Ubuntu 24.04)
 - yad (instalacija nudi da ga instalira preko apt, ili rucno:
   sudo apt install yad)
 
@@ -42,62 +45,74 @@ INSTALACIJA
     bash install.sh
 
 Pokrenite ga kao obican korisnik (bez sudo); sudo lozinku trazi sam,
-samo za upis u /usr/local/bin. Instalacija:
+gde je potrebno. Instalacija:
 
 - kopira skriptu kao lan-ip i pravi pokretac lan-ip-launcher u
   /usr/local/bin
-- kopira ikonicu iz foldera icon/ (ako je nema, koristi sistemsku
-  ikonicu mreznog porta)
-- dodaje stavku "IP Changer" u meni aplikacija
+- kopira ikonicu iz foldera icon/ u /usr/local/share/icons (ako je
+  nema, koristi sistemsku ikonicu mreznog porta)
+- dodaje stavku "IP Changer" u /usr/share/applications, pa je vide
+  svi nalozi (kategorije System, Settings, Utility)
+- pravi precicu "IP Changer" na radnoj povrsini svih postojecih
+  naloga (UID 1000 i vise), uz postovanje lokalizovanog imena
+  foldera (npr. "Radna povrsina"), i u /etc/skel/Desktop, pa je
+  dobijaju i nalozi napravljeni kasnije
+- podesava polkit akciju i pravilo za pokretanje bez lozinke za
+  grupu netdev
+- pravi grupu netdev (ako je nema) i dodaje u nju korisnika koji je
+  pokrenuo instalaciju
 
-Ako se stavka ne pojavi odmah, odjavite se i prijavite. Na Linux
-Mint-u se nalazi u grupi Administration (kategorija System).
+Posle prve instalacije se jednom odjavite i prijavite, da clanstvo u
+grupi netdev stupi na snagu. Ako se stavka ne pojavi u meniju odmah,
+odjavite se i prijavite i na ostalim nalozima. Na Linux Mint-u se
+nalazi u grupi Administration (kategorija System).
 
 
 UPOTREBA
 --------
-Pokrenite "IP Changer" iz menija aplikacija (trazi lozinku), ili iz
-terminala:
+Pokrenite "IP Changer" iz menija aplikacija ili sa precice na radnoj
+povrsini, ili iz terminala:
 
     sudo lan-ip
 
+Na nekim okruzenjima (npr. GNOME) je pri prvom pokretanju precice
+potrebno desnim tasterom izabrati "Allow Launching".
 
-POKRETANJE BEZ LOZINKE (OPCIONO)
---------------------------------
-Podrazumevano aplikacija trazi lozinku, jer menja mrezu kao root. Ako
-to ne zelite:
 
-    bash install.sh --no-password
+POKRETANJE BEZ LOZINKE (NETDEV)
+-------------------------------
+Aplikacija menja mrezu kao root, pa je zasticena polkit-om. Clanovi
+grupe netdev je pokrecu bez lozinke, i to vazi samo za ovu aplikaciju
+(svi ostali programi i dalje traze lozinku). Korisnici koji nisu u
+grupi unose lozinku.
 
-Aplikacija se tada pokrece bez lozinke za clanove grupe netdev, i samo
-ova aplikacija (svi ostali programi i dalje traze lozinku).
-Instalacija pravi grupu netdev ako je nema i dodaje vas u nju, pa se
-posle instalacije jednom odjavite i prijavite.
+Druge korisnike dodajete u grupu preko "Users and Groups" (grupa
+netdev, pa cekirate korisnike) ili komandom:
 
-Druge korisnike dodajete u grupu kasnije, npr. preko "Users and
-Groups" (grupa netdev, pa cekirate korisnike) ili komandom
-"sudo usermod -aG netdev ime_korisnika". Svaki dodati korisnik mora da
-se odjavi i prijavi. Korisnici koji nisu u grupi i dalje unose lozinku.
+    sudo usermod -aG netdev ime_korisnika
 
-Zahteva polkit 0.106 ili noviji (npr. Linux Mint 22, Ubuntu 24.04).
+Svaki dodati korisnik mora da se odjavi i prijavi.
+
 Imajte na umu da svaki program koji radi pod nalogom clana grupe tada
-moze da menja mrezna podesavanja bez lozinke, pa koristite ovu opciju
-samo na racunaru kojem verujete.
-
-Za povratak na unos lozinke pokrenite "bash uninstall.sh", pa ponovo
-"bash install.sh". Grupa netdev i clanstva ostaju kakva jesu.
+moze da menja mrezna podesavanja bez lozinke, pa koristite ovo samo na
+racunaru kojem verujete.
 
 
 UKLANJANJE
 ----------
     bash uninstall.sh
 
+Uklanja skriptu, pokretac, ikonicu, stavku u meniju, polkit pravila i
+precice sa radne povrsine svih naloga. Grupa netdev i clanstva ostaju
+kakva jesu.
+
 
 STRUKTURA REPOZITORIJUMA
 ------------------------
     ip_change/
       lan_ip_manager.sh   glavna skripta
-      install.sh          instalacija (skripta, pokretac, ikonica, meni)
+      install.sh          instalacija (skripta, pokretac, ikonica,
+                          meni, precice, polkit)
       uninstall.sh        uklanjanje
       icon/lan-ip.png     ikonica za meni
 
@@ -121,6 +136,14 @@ RESAVANJE PROBLEMA
 - Poruka da port nema signal: proverite mrezni kabl i uredjaj s druge
   strane. Podesavanja su vec sacuvana i primenice se cim se pojavi
   signal.
+- Stavka se ne vidi u meniju drugog naloga: proverite da postoji
+  /usr/share/applications/lan-ip.desktop, pa se odjavite i prijavite
+  na tom nalogu. Na XFCE-u pomaze i "xfce4-panel -r". Pogledajte i da
+  li stari fajl ~/.local/share/applications/lan-ip.desktop na tom
+  nalogu sakriva sistemsku stavku; ako postoji, obrisite ga. Precica
+  na radnoj povrsini radi i bez menija.
+- Trazi lozinku iako ste u grupi netdev: odjavite se i prijavite, pa
+  proverite komandom "id" da je netdev na spisku grupa.
 
 
 NAPOMENA

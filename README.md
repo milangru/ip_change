@@ -13,12 +13,13 @@ Grafička alatka za **Linux** koja prebacuje žičnu (Ethernet) konekciju izmeđ
 - Restart LAN porta posle svake izmene, uz čekanje da port dobije signal
 - Provera da li je adresa stvarno primenjena i poruka o grešci ako nije
 - Prozor ostaje otvoren posle primene, pa možete odmah praviti nove izmene
-- Stavka **IP Changer** u meniju aplikacija (System / Administration), sa ikonicom
+- **Instalacija za sve korisničke naloge** na računaru: stavka u meniju aplikacija i prečica na radnoj površini
+- **Pokretanje bez lozinke za članove grupe `netdev`**; ostali korisnici unose lozinku
 
 ## Zahtevi
 
-- Linux sa `NetworkManager`-om (`nmcli`) i `polkit`-om (`pkexec`)
-- `yad` (instalacija ga nudi da instalira preko `apt`, ili ručno: `sudo apt install yad`)
+- Linux sa `NetworkManager`-om (`nmcli`) i `polkit`-om (`pkexec`), polkit 0.106 ili noviji (npr. Linux Mint 22, Ubuntu 24.04)
+- `yad` (instalacija nudi da ga instalira preko `apt`, ili ručno: `sudo apt install yad`)
 
 ## Instalacija
 
@@ -28,37 +29,40 @@ cd ip_change
 bash install.sh
 ```
 
-Pokrenite ga kao običan korisnik (bez `sudo`); sudo lozinku traži sam, samo za upis u `/usr/local/bin`. Instalacija:
+Pokrenite ga kao običan korisnik (bez `sudo`); sudo lozinku traži sam, gde je potrebno. Instalacija:
 
 - kopira skriptu kao `lan-ip` i pravi pokretač `lan-ip-launcher` u `/usr/local/bin`
-- kopira ikonicu iz foldera `icon/` (ako je nema, koristi sistemsku ikonicu mrežnog porta)
-- dodaje stavku **IP Changer** u meni aplikacija
+- kopira ikonicu iz foldera `icon/` u `/usr/local/share/icons` (ako je nema, koristi sistemsku ikonicu mrežnog porta)
+- dodaje stavku **IP Changer** u `/usr/share/applications`, pa je vide **svi nalozi** (kategorije System, Settings, Utility)
+- pravi prečicu **IP Changer** na radnoj površini svih postojećih naloga (UID 1000 i više), uz poštovanje lokalizovanog imena foldera (npr. "Радна површина"), i u `/etc/skel/Desktop`, pa je dobijaju i nalozi napravljeni kasnije
+- podešava polkit akciju i pravilo za pokretanje bez lozinke za grupu `netdev`
+- pravi grupu `netdev` (ako je nema) i dodaje u nju korisnika koji je pokrenuo instalaciju
 
-Ako se stavka ne pojavi odmah, odjavite se i prijavite. Na Linux Mint-u se nalazi u grupi **Administration** (kategorija System).
+Posle prve instalacije se jednom odjavite i prijavite, da članstvo u grupi `netdev` stupi na snagu. Ako se stavka ne pojavi u meniju odmah, odjavite se i prijavite i na ostalim nalozima. Na Linux Mint-u se nalazi u grupi **Administration** (kategorija System).
 
 ## Upotreba
 
-Pokrenite **IP Changer** iz menija aplikacija (traži lozinku), ili iz terminala:
+Pokrenite **IP Changer** iz menija aplikacija ili sa prečice na radnoj površini, ili iz terminala:
 
 ```bash
 sudo lan-ip
 ```
 
-## Pokretanje bez lozinke (opciono)
+Na nekim okruženjima (npr. GNOME) je pri prvom pokretanju prečice potrebno desnim tasterom izabrati **Allow Launching**.
 
-Podrazumevano aplikacija traži lozinku, jer menja mrežu kao root. Ako to ne želite:
+## Pokretanje bez lozinke (netdev)
+
+Aplikacija menja mrežu kao root, pa je zaštićena polkit-om. Članovi grupe **`netdev`** je pokreću **bez lozinke**, i to važi samo za ovu aplikaciju (svi ostali programi i dalje traže lozinku). Korisnici koji nisu u grupi unose lozinku.
+
+Druge korisnike dodajete u grupu preko **Users and Groups** (grupa `netdev`, pa čekirate korisnike) ili komandom:
 
 ```bash
-bash install.sh --no-password
+sudo usermod -aG netdev ime_korisnika
 ```
 
-Aplikacija se tada pokreće bez lozinke za **članove grupe `netdev`**, i samo ova aplikacija (svi ostali programi i dalje traže lozinku). Instalacija pravi grupu `netdev` ako je nema i dodaje vas u nju, pa se posle instalacije jednom odjavite i prijavite.
+Svaki dodati korisnik mora da se odjavi i prijavi.
 
-Druge korisnike dodajete u grupu kasnije, npr. preko **Users and Groups** (grupa `netdev`, pa čekirate korisnike) ili komandom `sudo usermod -aG netdev ime_korisnika`. Svaki dodati korisnik mora da se odjavi i prijavi. Korisnici koji nisu u grupi i dalje unose lozinku.
-
-Zahteva polkit 0.106 ili noviji (npr. Linux Mint 22, Ubuntu 24.04). Imajte na umu da svaki program koji radi pod nalogom člana grupe tada može da menja mrežna podešavanja bez lozinke, pa koristite ovu opciju samo na računaru kojem verujete.
-
-Za povratak na unos lozinke pokrenite `bash uninstall.sh`, pa ponovo `bash install.sh`. Grupa `netdev` i članstva ostaju kakva jesu.
+Imajte na umu da svaki program koji radi pod nalogom člana grupe tada može da menja mrežna podešavanja bez lozinke, pa koristite ovo samo na računaru kojem verujete.
 
 ## Uklanjanje
 
@@ -66,12 +70,14 @@ Za povratak na unos lozinke pokrenite `bash uninstall.sh`, pa ponovo `bash insta
 bash uninstall.sh
 ```
 
+Uklanja skriptu, pokretač, ikonicu, stavku u meniju, polkit pravila i prečice sa radne površine svih naloga. Grupa `netdev` i članstva ostaju kakva jesu.
+
 ## Struktura repozitorijuma
 
 ```
 ip_change/
 ├── lan_ip_manager.sh   # glavna skripta
-├── install.sh          # instalacija (skripta, pokretač, ikonica, meni)
+├── install.sh          # instalacija (skripta, pokretač, ikonica, meni, prečice, polkit)
 ├── uninstall.sh        # uklanjanje
 └── icon/lan-ip.png     # ikonica za meni
 ```
@@ -92,6 +98,8 @@ Posle izmene ponovo pokrenite `bash install.sh`.
 
 - **Pita za lozinku, ali se prozor ne otvori:** root proces nema pristup ekranu. Jednom pokrenite `xhost +SI:localuser:root` i probajte ponovo.
 - **Poruka da port nema signal:** proverite mrežni kabl i uređaj s druge strane. Podešavanja su već sačuvana i primeniće se čim se pojavi signal.
+- **Stavka se ne vidi u meniju drugog naloga:** proverite da postoji `/usr/share/applications/lan-ip.desktop`, pa se odjavite i prijavite na tom nalogu. Na XFCE-u pomaže i `xfce4-panel -r`. Pogledajte i da li stari fajl `~/.local/share/applications/lan-ip.desktop` na tom nalogu sakriva sistemsku stavku; ako postoji, obrišite ga. Prečica na radnoj površini radi i bez menija.
+- **Traži lozinku iako ste u grupi `netdev`:** odjavite se i prijavite, pa proverite komandom `id` da je `netdev` na spisku grupa.
 
 ## Napomena
 
